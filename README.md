@@ -1,6 +1,7 @@
 ### Info
-Simple program for exploring go generics.
+Simple program for exploring go arenas.
 Based on:
 ```
-https://go.dev/doc/tutorial/generics
+https://docs.go101.org/std/pkg/arena.html
+https://docs.go101.org/std/src/arena/arena.go.html
 ```
