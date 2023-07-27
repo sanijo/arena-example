@@ -14,7 +14,7 @@ type TestUser struct {
 	Phone     string `json:"phone"`
 }
 
-const numObjectsTesting = 100000
+const numObjectsTesting = 100000 // Number of objects to allocate and deallocate
 
 // BenchmarkArenas tests the performance of allocating and marshaling User objects using arenas.
 func BenchmarkArenas(b *testing.B) {

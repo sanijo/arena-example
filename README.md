@@ -42,7 +42,10 @@ Relative difference is calculated as:
 
 The benchmarks suggest that, for this specific task, the arena approach was faster but used less memory per operation compared to Go's garbage collector. This is typical of the trade-off you might expect when using an arena-based approach. Arenas can allocate and deallocate memory faster, but at the expense of using more memory since they typically allocate a large block of memory upfront and do not immediately return freed memory back to the system.
 
-The number of memory allocations in the arena case is slightly less than in the GC case, which indicates that the arena might be using larger chunks of memory at a time, leading to less fragmentation and thus fewer total allocations.
+The number of memory allocations in the arena case is slightly less than in the
+GC case. This could be due to the arena's strategy of pre-allocating a large
+block of memory and parceling it out as needed, which reduces the number of
+separate allocations it has to request from the operating system.
 
 These results are specific to this particular benchmark and the type of operations it is performing. The relative performance of garbage collection vs arenas can vary depending on the specific use case, such as the size and lifecycle of the objects being allocated, and the patterns of memory usage in the program.
 
