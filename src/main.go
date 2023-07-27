@@ -26,35 +26,35 @@ func main() {
 	startTime := time.Now()
 
 	if arenaEnabled {
-        fmt.Println("arenaEnabled case with numObjects = ", numObjects)
+		fmt.Println("arenaEnabled case with numObjects = ", numObjects)
 		a := arena.NewArena() // Create a new arena
 
-	    // Slice to store User objects using arena memory
-        users := arena.MakeSlice[User](a, numObjects, numObjects)
+		// Slice to store User objects using arena memory
+		users := arena.MakeSlice[User](a, numObjects, numObjects)
 
-        // Add objects to the slice
-        for i := 0; i < numObjects; i++ {
-            users[i] = User{
-                FirstName: fmt.Sprintf("TestUser%d", i),
-                LastName:  fmt.Sprintf("Lastname%d", i),
-                Email:     fmt.Sprintf("user%d@example.com", i),
-                Phone:     fmt.Sprintf("123456789%d", i),
-            }
-        }
+		// Add objects to the slice
+		for i := 0; i < numObjects; i++ {
+			users[i] = User{
+				FirstName: fmt.Sprintf("TestUser%d", i),
+				LastName:  fmt.Sprintf("Lastname%d", i),
+				Email:     fmt.Sprintf("user%d@example.com", i),
+				Phone:     fmt.Sprintf("123456789%d", i),
+			}
+		}
 
-        // Marshal each User object to JSON (to simulate some processing)
-        for _, user := range users {
-            _, err := json.Marshal(user)
-            if err != nil {
-                log.Fatal(err)
-            }
-        }
+		// Marshal each User object to JSON (to simulate some processing)
+		for _, user := range users {
+			_, err := json.Marshal(user)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 
-        a.Free() // free the arena
+		a.Free() // free the arena
 	} else {
-        fmt.Println("arenaDisabled case with numObjects = ", numObjects)
-        // Slice to store pointers to User objects
-        var users []*User
+		fmt.Println("arenaDisabled case with numObjects = ", numObjects)
+		// Slice to store pointers to User objects
+		var users []*User
 		// Allocate memory using the garbage collector and add pointers to the slice
 		for i := 0; i < numObjects; i++ {
 			userObj := &User{
@@ -66,13 +66,13 @@ func main() {
 			users = append(users, userObj)
 		}
 
-        // Marshal each User object to JSON (to simulate some processing)
-        for _, user := range users {
-            _, err := json.Marshal(user)
-            if err != nil {
-                log.Fatal(err)
-            }
-        }
+		// Marshal each User object to JSON (to simulate some processing)
+		for _, user := range users {
+			_, err := json.Marshal(user)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 
 	}
 
@@ -81,4 +81,3 @@ func main() {
 
 	fmt.Printf("Time taken: %s\n", elapsedTime)
 }
-
