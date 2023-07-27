@@ -22,30 +22,25 @@ const (
 )
 
 func main() {
-//    var users []*User
 	// Measure the execution time
 	startTime := time.Now()
 
 	if arenaEnabled {
         fmt.Println("arenaEnabled case with numObjects = ", numObjects)
 		a := arena.NewArena() // Create a new arena
-		defer a.Free() // Free all memory allocated by the arena after it goes out of scope.
 
-	    // Slice to store pointers to User objects using arena memory
-        users := arena.MakeSlice[*User](a, 0, numObjects) // Make a slice of length 0 and capacity numObjects
+	    // Slice to store User objects using arena memory
+        users := arena.MakeSlice[User](a, numObjects, numObjects)
 
-		// Allocate memory for all User objects from the arena and add pointers to the slice
-		for i := 0; i < numObjects; i++ {
-			userObj := arena.New[User](a) // Allocate memory from the arena
-            // Set the fields of the object through the pointer.
-			*userObj = User{
-				FirstName: fmt.Sprintf("User%d", i),
-				LastName:  fmt.Sprintf("Lastname%d", i),
-				Email:     fmt.Sprintf("user%d@example.com", i),
-				Phone:     fmt.Sprintf("123456789%d", i),
-			}
-			users = append(users, userObj)
-		}
+        // Add objects to the slice
+        for i := 0; i < numObjects; i++ {
+            users[i] = User{
+                FirstName: fmt.Sprintf("TestUser%d", i),
+                LastName:  fmt.Sprintf("Lastname%d", i),
+                Email:     fmt.Sprintf("user%d@example.com", i),
+                Phone:     fmt.Sprintf("123456789%d", i),
+            }
+        }
 
         // Marshal each User object to JSON (to simulate some processing)
         for _, user := range users {
@@ -54,6 +49,8 @@ func main() {
                 log.Fatal(err)
             }
         }
+
+        a.Free() // free the arena
 	} else {
         fmt.Println("arenaDisabled case with numObjects = ", numObjects)
         // Slice to store pointers to User objects
@@ -78,13 +75,6 @@ func main() {
         }
 
 	}
-//    // Marshal each User object to JSON (to simulate some processing)
-//    for _, user := range users {
-//        _, err := json.Marshal(user)
-//        if err != nil {
-//            log.Fatal(err)
-//        }
-//    }
 
 	// Measure the execution time
 	elapsedTime := time.Since(startTime)

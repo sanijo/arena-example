@@ -2,49 +2,64 @@ package main
 
 import (
 	"arena"
-	"encoding/json"
 	"fmt"
-	"log"
 	"testing"
 )
+
+// Type User is a struct with JSON struct tags to specify the JSON field names.
+type TestUser struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+}
 
 const numObjectsTesting = 100000
 
 // BenchmarkArenas tests the performance of allocating and marshaling User objects using arenas.
 func BenchmarkArenas(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		a := arena.NewArena()
-		users := arena.MakeSlice[*User](a, 0, numObjectsTesting)
+        for i := 0; i < b.N; i++ {
+                a := arena.NewArena()
+//                users := arena.MakeSlice[*TestUser](a, numObjectsTesting, 2*numObjectsTesting)
+//
+//                for i := 0; i < numObjectsTesting; i++ {
+//                        userObj := arena.New[TestUser](a)
+//                        *userObj = TestUser{
+//                                FirstName: fmt.Sprintf("TestUser%d", i),
+//                                LastName:  fmt.Sprintf("Lastname%d", i),
+//                                Email:     fmt.Sprintf("user%d@example.com", i),
+//                                Phone:     fmt.Sprintf("123456789%d", i),
+//                        }
+//                        users = append(users, userObj)
+//                }
+                users := arena.MakeSlice[TestUser](a, numObjectsTesting, numObjectsTesting)
 
-		for i := 0; i < numObjectsTesting; i++ {
-			userObj := arena.New[User](a)
-			*userObj = User{
-				FirstName: fmt.Sprintf("User%d", i),
-				LastName:  fmt.Sprintf("Lastname%d", i),
-				Email:     fmt.Sprintf("user%d@example.com", i),
-				Phone:     fmt.Sprintf("123456789%d", i),
-			}
-			users = append(users, userObj)
-		}
+                for i := 0; i < numObjectsTesting; i++ {
+                    users[i] = TestUser{
+                        FirstName: fmt.Sprintf("TestUser%d", i),
+                        LastName:  fmt.Sprintf("Lastname%d", i),
+                        Email:     fmt.Sprintf("user%d@example.com", i),
+                        Phone:     fmt.Sprintf("123456789%d", i),
+                    }
+                }
 
-		for _, user := range users {
-			_, err := json.MarshalIndent(user, "", "  ")
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+                // Perform operations on objects
+                for _, user := range users {
+                    user.FirstName = "NewName"
+                    user.Email = "new@example.com"
+                }
 
-		a.Free()
-	}
+                a.Free() // free the arena after each iteration
+        }
 }
 
 // BenchmarkGarbageCollector tests the performance of allocating and marshaling User objects using the garbage collector.
 func BenchmarkGarbageCollector(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		var users []*User
+		var users []*TestUser
 
 		for i := 0; i < numObjectsTesting; i++ {
-			userObj := &User{
+			userObj := &TestUser{
 				FirstName: fmt.Sprintf("User%d", i),
 				LastName:  fmt.Sprintf("Lastname%d", i),
 				Email:     fmt.Sprintf("user%d@example.com", i),
@@ -52,27 +67,10 @@ func BenchmarkGarbageCollector(b *testing.B) {
 			}
 			users = append(users, userObj)
 		}
-
-		for _, user := range users {
-			_, err := json.MarshalIndent(user, "", "  ")
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+        // Perform operations on objects
+        for _, user := range users {
+            user.FirstName = "NewName"
+            user.Email = "new@example.com"
+        }
 	}
 }
-
-// run_benchmarks runs the benchmarks.
-func TestMain(m *testing.M) {
-    fmt.Println("Running benchmarks...")
-    fmt.Printf("Number of Objects: %d\n", numObjectsTesting)
-
-    // Run benchmarks
-    arenaTime := testing.Benchmark(BenchmarkArenas)
-    gcTime := testing.Benchmark(BenchmarkGarbageCollector)
-
-    // Convert and Print results in milliseconds
-    fmt.Printf("Arenas Time: %.2f ms (%d iterations)\n", arenaTime.T.Seconds()*1000, arenaTime.N)
-    fmt.Printf("Garbage Collector Time: %.2f ms (%d iterations)\n", gcTime.T.Seconds()*1000, gcTime.N)
-}
-
