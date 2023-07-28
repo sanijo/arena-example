@@ -8,30 +8,33 @@ import (
 
 // Type User is a struct with JSON struct tags to specify the JSON field names.
 type TestUser struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	Phone     string `json:"phone"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	Email       string      `json:"email"`
+	Phone       string      `json:"phone"`
+	TestCompany TestCompany `json:"company"`
 }
 
-const numObjectsTesting = 100000 // Number of objects to allocate and deallocate
+type TestCompany struct {
+	Name                string              `json:"name"`
+	Address             string              `json:"address"`
+	NumberOfEmployees   int                 `json:"number_of_employees"`
+	TestFinancialReport TestFinancialReport `json:"financial_report"`
+}
+
+type TestFinancialReport struct {
+	Revenue int `json:"revenue"`
+	Profit  int `json:"profit"`
+}
+
+const numObjectsTesting = 1000000 // Number of objects to allocate and deallocate
 
 // BenchmarkArenas tests the performance of allocating and marshaling User objects using arenas.
 func BenchmarkArenas(b *testing.B) {
 	for i := 0; i < b.N; i++ {
+		// Allocate arena
 		a := arena.NewArena()
-		//                users := arena.MakeSlice[*TestUser](a, numObjectsTesting, 2*numObjectsTesting)
-		//
-		//                for i := 0; i < numObjectsTesting; i++ {
-		//                        userObj := arena.New[TestUser](a)
-		//                        *userObj = TestUser{
-		//                                FirstName: fmt.Sprintf("TestUser%d", i),
-		//                                LastName:  fmt.Sprintf("Lastname%d", i),
-		//                                Email:     fmt.Sprintf("user%d@example.com", i),
-		//                                Phone:     fmt.Sprintf("123456789%d", i),
-		//                        }
-		//                        users = append(users, userObj)
-		//                }
+		// Allocate slice of TestUser objects
 		users := arena.MakeSlice[TestUser](a, numObjectsTesting, numObjectsTesting)
 
 		for i := 0; i < numObjectsTesting; i++ {
@@ -40,6 +43,14 @@ func BenchmarkArenas(b *testing.B) {
 				LastName:  fmt.Sprintf("Lastname%d", i),
 				Email:     fmt.Sprintf("user%d@example.com", i),
 				Phone:     fmt.Sprintf("123456789%d", i),
+				TestCompany: TestCompany{
+					Name:    fmt.Sprintf("TestCompany%d", i),
+					Address: fmt.Sprintf("Address%d", i),
+					TestFinancialReport: TestFinancialReport{
+						Revenue: 4 * i,
+						Profit:  3 * i,
+					},
+				},
 			}
 		}
 
@@ -64,6 +75,14 @@ func BenchmarkGarbageCollector(b *testing.B) {
 				LastName:  fmt.Sprintf("Lastname%d", i),
 				Email:     fmt.Sprintf("user%d@example.com", i),
 				Phone:     fmt.Sprintf("123456789%d", i),
+				TestCompany: TestCompany{
+					Name:    fmt.Sprintf("TestCompany%d", i),
+					Address: fmt.Sprintf("Address%d", i),
+					TestFinancialReport: TestFinancialReport{
+						Revenue: 4 * i,
+						Profit:  3 * i,
+					},
+				},
 			}
 			users = append(users, userObj)
 		}
